@@ -7,9 +7,12 @@ import matplotlib.pyplot as plt
 
     Read them in like a list. It's a 2D list. Should be 16 and then 7000 things inside each thing
 '''
+
+
 class ReadingStuff:
     def()
-    
+
+
 if __name__ == "__main__":
 
     with open("ciphers.txt", "r") as f:
@@ -48,9 +51,9 @@ if __name__ == "__main__":
         i = indexmap[j]
         for k in range(256):
             for p in range(7000):
-                HD[][][] = HW(sbox_inv(ciphersArray[p][b])^k)^ciphersArray[p][i]
+                HD[][][] = HW(sbox_inv(ciphersArray[p][b]) ^ k) ^ ciphersArray[p][i]
             corr = pearsonr(HD[0:6999][b][p], p[0:6999][2663])
         key = argmax(corr[b][p])
 
-    plt.plot(x_axis, key )
+    plt.plot(x_axis, key)
     plt.show()
