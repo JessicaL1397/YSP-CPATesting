@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.stats import pearsonr
 
 '''
     Cipher.txt = 7000 rows vs 16 columns
@@ -47,15 +48,18 @@ if __name__ == "__main__":
         0x17, 0x2B, 0x04, 0x7E, 0xBA, 0x77, 0xD6, 0x26, 0xE1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0C, 0x7D
     ], dtype=np.uint8)
 
-    for b in range(16):
-        i = indexmap[j]
-        for k in range(256):
-            for p in range(7000):
-                HD[][][] = HW(sbox_inv(ciphersArray[p][b]) ^ k) ^ ciphersArray[p][i]
-            corr = pearsonr(HD[0:6999][b][p], p[0:6999][2663])
-        key = argmax(corr[b][p])
+    for b in range(16): # Number of bytes that circulate
+        i = indexmap[j] #Supposedly this is from Pandas, need to do more searching though
+        for k in range(256): # Number of keys in each byte
+            for p in range(7000): #Number of traces
+                HD[p][b][k] = HW(sbox_inv(ciphersArray[p][b]) ^ k) ^ ciphersArray[p][i]
+                #Find the Hamming weight documentation/thing?
+                #Okay so apperantly it's something that I have to make? I found example code
+            corr[b][k] = pearsonr(HD[0:6999][b][p], power[0:6999][2663])
+        key[b] = argmax(corr[b][p])
 
     plt.plot(x_axis, key)
     plt.show()
 
-#Pasta Time. Clearly, I know what pasta is. Of course. 
+    #Reminder to ask Faraz what he meant about the bytes and needing to read that in. I don't have the
+    # Documentation on hand for that? 
