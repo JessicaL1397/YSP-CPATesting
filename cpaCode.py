@@ -55,11 +55,11 @@ if __name__ == "__main__":
         0x17, 0x2B, 0x04, 0x7E, 0xBA, 0x77, 0xD6, 0x26, 0xE1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0C, 0x7D
     ], dtype=np.uint8)
 
-    guesses = [0 : 255 : 1]#initalize array of 0 ==> 255
+    guesses = [0, 256, 1]#initalize array of 0 ==> 255
     hamWeight = []
     
-        i = 0
-        j = 0 
+    i = 0
+    j = 0 
 
     for k in range(256): # Number of keys in each byte
         for p in range(7000): #Number of traces
@@ -71,6 +71,3 @@ if __name__ == "__main__":
 
     plt.plot(guesses, corr)
     plt.show()
-
-    #Reminder to ask Faraz what he meant about the bytes and needing to read that in. I don't have the
-    # Documentation on hand for that? -- It was for Hamming Weight. 
