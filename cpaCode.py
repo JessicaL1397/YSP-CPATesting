@@ -10,8 +10,15 @@ from scipy.stats import pearsonr
 '''
 
 
-class ReadingStuff:
-    def()
+class Bytes():
+    def __init__ () : 
+        pass
+
+    def ones(x):        
+        return bin(x).count('1')
+
+    def distance(x):        
+        return bin(x).count('1')
 
 
 if __name__ == "__main__":
@@ -48,18 +55,22 @@ if __name__ == "__main__":
         0x17, 0x2B, 0x04, 0x7E, 0xBA, 0x77, 0xD6, 0x26, 0xE1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0C, 0x7D
     ], dtype=np.uint8)
 
-    for b in range(16): # Number of bytes that circulate
-        i = indexmap[j] #Supposedly this is from Pandas, need to do more searching though
-        for k in range(256): # Number of keys in each byte
-            for p in range(7000): #Number of traces
-                HD[p][b][k] = HW(sbox_inv(ciphersArray[p][b]) ^ k) ^ ciphersArray[p][i]
-                #Find the Hamming weight documentation/thing?
-                #Okay so apperantly it's something that I have to make? I found example code
-            corr[b][k] = pearsonr(HD[0:6999][b][p], power[0:6999][2663])
-        key[b] = argmax(corr[b][p])
+    guesses = [0 : 255 : 1]#initalize array of 0 ==> 255
+    hamWeight = []
+    
+        i = 0
+        j = 0 
 
-    plt.plot(x_axis, key)
+    for k in range(256): # Number of keys in each byte
+        for p in range(7000): #Number of traces
+            HamDis[p][j][k] = ones(sbox_inv(ciphersArray[p][b]) ^ k) ^ ciphersArray[p][i]
+                #If it takes in the ^ XOR
+
+            corr[j][k] = pearsonr(hamDis[0:6999][j][k], power[0:6999][2663])
+        key = argmax(corr[j][p]) #This is just going to give you the right one. 
+
+    plt.plot(guesses, corr)
     plt.show()
 
     #Reminder to ask Faraz what he meant about the bytes and needing to read that in. I don't have the
-    # Documentation on hand for that? 
+    # Documentation on hand for that? -- It was for Hamming Weight. 
