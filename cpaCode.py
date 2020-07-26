@@ -11,32 +11,37 @@ from scipy.stats import pearsonr
 
 
 class Bytes():
-    def __init__ () : 
+    def __init__():
         pass
 
-    def ones(x):        
+    def ones(x):
         return bin(x).count('1')
 
-    def distance(x):        
+    def distance(x):
         return bin(x).count('1')
+
+
+def ones(x):
+    return bin(x).count('1')
 
 
 if __name__ == "__main__":
 
-    with open("ciphers.txt", "r") as f:
-        ciphers = f.readlines()
-    ciphersArray = np.loadtxt(ciphers)
+    # with open("ciphers.txt", "r") as f:
+    #     ciphers = f.readlines()
+    ciphersArray = np.loadtxt("ciphers.txt", dtype=np.uint8)
+    print(ciphersArray.shape)
 
-    with open("line.txt", "r") as f:
-        samplePts = f.readline()
-    samplePts = samplePts.slice()
-    x_axis = np.loadtxt(samplePts)
+    # with open("line.txt", "r") as f:
+    #     samplePts = f.readline()
+    # samplePts = samplePts.slice()
+    # x_axis = np.loadtxt(samplePts)
 
-    with open("2663.txt", "r") as f:
-        power = f.readline()
-    power = np.loadtxt(power)
+    # with open("2663.txt", "r") as f:
+    #     power = f.readline()
+    power = np.loadtxt("2663.txt", dtype=np.int32)
+    print(power.shape)
 
-    
     sbox_inv = np.array([
         0x52, 0x09, 0x6A, 0xD5, 0x30, 0x36, 0xA5, 0x38, 0xBF, 0x40, 0xA3, 0x9E, 0x81, 0xF3, 0xD7, 0xFB,
         0x7C, 0xE3, 0x39, 0x82, 0x9B, 0x2F, 0xFF, 0x87, 0x34, 0x8E, 0x43, 0x44, 0xC4, 0xDE, 0xE9, 0xCB,
@@ -56,19 +61,23 @@ if __name__ == "__main__":
         0x17, 0x2B, 0x04, 0x7E, 0xBA, 0x77, 0xD6, 0x26, 0xE1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0C, 0x7D
     ], dtype=np.uint8)
 
-    guesses = [0, 256, 1]#initalize array of 0 ==> 255
+    # guesses = [0, 256, 1]  # initalize array of 0 ==> 255
+    guesses = list(range(256))
     hamWeight = []
-    
+
     i = 0
-    j = 0 
+    j = 0
 
-    for k in range(256): # Number of keys in each byte
-        for p in range(7000): #Number of traces
-            HamDis[p][j][k] = ones(sbox_inv(ciphersArray[p][j]) ^ k) ^ ciphersArray[p][i]
-                #If it takes in the ^ XOR
+    HamDis = np.zeros((7000, 16, 256), dtype=np.uint8)
+    for k in range(256):  # Number of keys in each byte
+        for p in range(7000):  # Number of traces
+            HamDis[p][j][k] = ones(
+                sbox_inv[ciphersArray[p][j] ^ k] ^ ciphersArray[p][i])
 
-            corr[j][k] = pearsonr(HamDis[0:6999][j][k], power[0:6999][2663])
-        key = argmax(corr[j][p]) #This is just going to give you the right one. 
+    corr = np.zeros((16, 256), dtype=np.float32)
+    for k in range(256):
+        corr[j][k], _ = pearsonr(HamDis[:, j, k], power)
 
-    plt.plot(guesses, corr)
+    corr = np.abs(corr)
+    plt.plot(guesses, corr[j, :])
     plt.show()
