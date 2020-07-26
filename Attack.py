@@ -1,19 +1,22 @@
 # %%
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.stats import pearsonr
+from functools import lru_cache
+# with open("first_line.txt", 'r') as f:
+#     x = f.readline().split()
+# x = [int(y) for y in x]
+# print(x)
+# plt.plot(x)
 
-with open("first_line.txt", 'r') as f:
-    x = f.readline().split()
-x = [int(y) for y in x]
-#print(x)
-#plt.plot(x)
 
-
+@lru_cache(1024)
 def ones(x):
     return bin(x).count('1')
 
 
 hammingWeight = [ones(n) for n in range(0, 256)]
+hammingWeight = np.array(hammingWeight, dtype=np.uint8)
 
 sbox_inv = np.array([
     0x52, 0x09, 0x6A, 0xD5, 0x30, 0x36, 0xA5, 0x38, 0xBF, 0x40, 0xA3, 0x9E, 0x81, 0xF3, 0xD7, 0xFB,
@@ -35,60 +38,67 @@ sbox_inv = np.array([
 ], dtype=np.uint8)
 
 
-def outputSBox(plainText, keyGuess):
-    return sbox_inv[plainText ^ keyGuess]
+def outputSBox(cipherByte, keyGuess):
+    return sbox_inv[cipherByte ^ keyGuess]
 
 
-traces = np.loadtxt('traces.txt', dtype=np.uint8)
-plainText = np.loadtxt('plaintexts.txt', dtype=np.uint8)
-#firstLine = np.loadtxt('first_line.txt', dtype=np.uint8)
+# traces = np.loadtxt('traces.txt', dtype=np.uint8)
+# plainText = np.loadtxt('plaintexts.txt', dtype=np.uint8)
+# #firstLine = np.loadtxt('first_line.txt', dtype=np.uint8)
 
+
+traces = np.loadtxt("2663.txt", dtype=np.int32)
+ciphers = np.loadtxt("ciphers.txt", dtype=np.uint8)
 numTraces = np.shape(traces)[0]
-numPoint = np.shape(traces)[1]
-
+# numPoint = np.shape(traces)[1]
 graph = []
 
 finalGuess = [0]*16
-for b in range(0, 1):
-    cpaOutput = [0]*256
-    maxCPA = [0]*256
-    for keyGuess in range(0, 256):
-        #print("Subkey %2d, hyp = %02x" % (b, keyGuess))
+# for b in range(0, 1):
+b = 1
+cpaOutput = np.zeros((256,), dtype=np.float32)
+maxCPA = [0]*256
+for keyGuess in range(0, 256):
+    #print("Subkey %2d, hyp = %02x" % (b, keyGuess))
 
-        # Initialize arrays & variables to zero
-        sumnum = np.zeros(numPoint)
-        sumden1 = np.zeros(numPoint)
-        sumden2 = np.zeros(numPoint)
+    # Initialize arrays & variables to zero
+    # sumnum = np.zeros(numPoint)
+    # sumden1 = np.zeros(numPoint)
+    # sumden2 = np.zeros(numPoint)
 
-        hyp = np.zeros(numTraces)
-        for t in range(0, numTraces):
-            hyp[t] = hammingWeight[outputSBox(plainText[t][b], keyGuess)]
+    hyp = np.zeros(numTraces, dtype=np.uint8)
+    for t in range(0, numTraces):
+        # hyp[t] = hammingWeight[outputSBox(
+        #     ciphers[t][b], keyGuess) ^ ciphers[t][b]]
+        hyp[t] = ones(sbox_inv[ciphers[t][b] ^ keyGuess] ^ ciphers[t][b])
 
-        # Mean of hypothetical
-        meanH = np.mean(hyp, dtype=np.float64)
+    # # Mean of hypothetical
+    # meanH = np.mean(hyp, dtype=np.float64)
 
-        # Mean of all points in trace
-        meanT = np.mean(traces, axis=0, dtype=np.float64)
+    # # Mean of all points in trace
+    # meanT = np.mean(traces, axis=0, dtype=np.float64)
 
-        for t in range(0, numTraces):
-            hDiff = (hyp[t] - meanH)
-            tDiff = traces[t, :] - meanT
+    # for t in range(0, numTraces):
+    #     hDiff = (hyp[t] - meanH)
+    #     tDiff = traces[t, :] - meanT
 
-            sumnum = sumnum + (hDiff*tDiff)
-            sumden1 = sumden1 + hDiff*hDiff
-            sumden2 = sumden2 + tDiff*tDiff
+    #     sumnum = sumnum + (hDiff*tDiff)
+    #     sumden1 = sumden1 + hDiff*hDiff
+    #     sumden2 = sumden2 + tDiff*tDiff
 
-        cpaOutput[keyGuess] = sumnum / np.sqrt(sumden1 * sumden2)
-        maxCPA[keyGuess] = max(abs(cpaOutput[keyGuess]))
+    cpaOutput[keyGuess] = pearsonr(hyp, traces)[0]
+    # maxCPA[keyGuess] = max(abs(cpaOutput[keyGuess]))
 
-        graph.append(maxCPA[keyGuess])
-        #print (maxCPA[keyGuess])
+    # graph.append(maxCPA[keyGuess])
+    #print (maxCPA[keyGuess])
+cpaOutput = np.abs(cpaOutput)
+plt.plot(range(256), cpaOutput)
+plt.show()
+# finalGuess[b] = np.argmax(maxCPA)
 
-    plt.plot(graph)
-    finalGuess[b] = np.argmax(maxCPA)
+print("Best Key Guess: ", np.argmax(cpaOutput))
+# for f in finalGuess:
+#     print("%02x" % f)
 
-print("Best Key Guess: ")
-for f in finalGuess: 
-    print("%02x" % f)
 
 # %%
