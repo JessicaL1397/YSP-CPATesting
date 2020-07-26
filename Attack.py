@@ -49,7 +49,7 @@ numPoint = np.shape(traces)[1]
 graph = []
 
 finalGuess = [0]*16
-for b in range(0, 16):
+for b in range(0, 1):
     cpaOutput = [0]*256
     maxCPA = [0]*256
     for keyGuess in range(0, 256):
