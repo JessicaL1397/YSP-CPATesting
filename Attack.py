@@ -2,7 +2,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import pearsonr
-from functools import lru_cache
 # with open("first_line.txt", 'r') as f:
 #     x = f.readline().split()
 # x = [int(y) for y in x]
@@ -10,7 +9,6 @@ from functools import lru_cache
 # plt.plot(x)
 
 
-@lru_cache(1024)
 def ones(x):
     return bin(x).count('1')
 
@@ -55,7 +53,7 @@ graph = []
 
 finalGuess = [0]*16
 # for b in range(0, 1):
-b = 1
+b = 0
 cpaOutput = np.zeros((256,), dtype=np.float32)
 maxCPA = [0]*256
 for keyGuess in range(0, 256):
@@ -68,9 +66,8 @@ for keyGuess in range(0, 256):
 
     hyp = np.zeros(numTraces, dtype=np.uint8)
     for t in range(0, numTraces):
-        # hyp[t] = hammingWeight[outputSBox(
-        #     ciphers[t][b], keyGuess) ^ ciphers[t][b]]
-        hyp[t] = ones(sbox_inv[ciphers[t][b] ^ keyGuess] ^ ciphers[t][b])
+        hyp[t] = hammingWeight[outputSBox(
+            ciphers[t][b], keyGuess) ^ ciphers[t][b]]
 
     # # Mean of hypothetical
     # meanH = np.mean(hyp, dtype=np.float64)
