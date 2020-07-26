@@ -2,16 +2,18 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-with open("first_line.txt",'r') as f:
+with open("first_line.txt", 'r') as f:
     x = f.readline().split()
 x = [int(y) for y in x]
 #print(x)
-plt.plot(x)
+#plt.plot(x)
 
-def ones(x):        
+
+def ones(x):
     return bin(x).count('1')
 
-hammingWeight = [ones(n) for n in range(0,256)]
+
+hammingWeight = [ones(n) for n in range(0, 256)]
 
 sbox_inv = np.array([
     0x52, 0x09, 0x6A, 0xD5, 0x30, 0x36, 0xA5, 0x38, 0xBF, 0x40, 0xA3, 0x9E, 0x81, 0xF3, 0xD7, 0xFB,
@@ -32,25 +34,28 @@ sbox_inv = np.array([
     0x17, 0x2B, 0x04, 0x7E, 0xBA, 0x77, 0xD6, 0x26, 0xE1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0C, 0x7D
 ], dtype=np.uint8)
 
+
 def outputSBox(plainText, keyGuess):
     return sbox_inv[plainText ^ keyGuess]
 
-traces = np.loadtxt('traces.txt')
-plainText = np.loadtxt('plaintexts.txt')
-firstLine = np.loadtxt('first_line.txt')
+
+traces = np.loadtxt('traces.txt', dtype=np.uint8)
+plainText = np.loadtxt('plaintexts.txt', dtype=np.uint8)
+#firstLine = np.loadtxt('first_line.txt', dtype=np.uint8)
 
 numTraces = np.shape(traces)[0]
 numPoint = np.shape(traces)[1]
 
+graph = []
 
-finalGuess = [0]*1
+finalGuess = [0]*16
 for b in range(0, 16):
     cpaOutput = [0]*256
     maxCPA = [0]*256
     for keyGuess in range(0, 256):
-        print ("Poskey %2d, hyp = %02x"%(b, keyGuess))   
-        
-        #Initialize arrays & variables to zero
+        #print("Subkey %2d, hyp = %02x" % (b, keyGuess))
+
+        # Initialize arrays & variables to zero
         sumnum = np.zeros(numPoint)
         sumden1 = np.zeros(numPoint)
         sumden2 = np.zeros(numPoint)
@@ -59,25 +64,31 @@ for b in range(0, 16):
         for t in range(0, numTraces):
             hyp[t] = hammingWeight[outputSBox(plainText[t][b], keyGuess)]
 
-        #Mean of hypothetical
+        # Mean of hypothetical
         meanH = np.mean(hyp, dtype=np.float64)
 
-        #Mean of all points in trace
+        # Mean of all points in trace
         meanT = np.mean(traces, axis=0, dtype=np.float64)
-        
-        
+
         for t in range(0, numTraces):
             hDiff = (hyp[t] - meanH)
-            tDiff = traces[t,:] - meanT
+            tDiff = traces[t, :] - meanT
 
             sumnum = sumnum + (hDiff*tDiff)
-            sumden1 = sumden1 + hDiff*hDiff 
+            sumden1 = sumden1 + hDiff*hDiff
             sumden2 = sumden2 + tDiff*tDiff
-             
+
         cpaOutput[keyGuess] = sumnum / np.sqrt(sumden1 * sumden2)
         maxCPA[keyGuess] = max(abs(cpaOutput[keyGuess]))
 
+        graph.append(maxCPA[keyGuess])
+        #print (maxCPA[keyGuess])
 
-        
+    plt.plot(graph)
+    finalGuess[b] = np.argmax(maxCPA)
+
+print("Best Key Guess: ")
+for f in finalGuess: 
+    print("%02x" % f)
+
 # %%
-
