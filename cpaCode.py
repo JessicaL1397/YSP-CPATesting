@@ -36,6 +36,7 @@ if __name__ == "__main__":
         power = f.readline()
     power = np.loadtxt(power)
 
+    
     sbox_inv = np.array([
         0x52, 0x09, 0x6A, 0xD5, 0x30, 0x36, 0xA5, 0x38, 0xBF, 0x40, 0xA3, 0x9E, 0x81, 0xF3, 0xD7, 0xFB,
         0x7C, 0xE3, 0x39, 0x82, 0x9B, 0x2F, 0xFF, 0x87, 0x34, 0x8E, 0x43, 0x44, 0xC4, 0xDE, 0xE9, 0xCB,
@@ -63,10 +64,10 @@ if __name__ == "__main__":
 
     for k in range(256): # Number of keys in each byte
         for p in range(7000): #Number of traces
-            HamDis[p][j][k] = ones(sbox_inv(ciphersArray[p][b]) ^ k) ^ ciphersArray[p][i]
+            HamDis[p][j][k] = ones(sbox_inv(ciphersArray[p][j]) ^ k) ^ ciphersArray[p][i]
                 #If it takes in the ^ XOR
 
-            corr[j][k] = pearsonr(hamDis[0:6999][j][k], power[0:6999][2663])
+            corr[j][k] = pearsonr(HamDis[0:6999][j][k], power[0:6999][2663])
         key = argmax(corr[j][p]) #This is just going to give you the right one. 
 
     plt.plot(guesses, corr)
