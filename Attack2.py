@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import pearsonr
 
+
 def ones(x):
     return bin(x).count('1')
 
@@ -34,14 +35,13 @@ def outputSBox(cipherByte, keyGuess):
     return sbox_inv[cipherByte ^ keyGuess]
 
 
-
 traces = np.loadtxt("2663.txt", dtype=np.int32)
 ciphers = np.loadtxt("ciphers.txt", dtype=np.uint8)
 numTraces = np.shape(traces)[0]
 
 graph = []
 
-indexMap = [0,5,10,15,4,9,14,3,8,13,2,7,12,1,6,11]
+indexMap = [0, 5, 10, 15, 4, 9, 14, 3, 8, 13, 2, 7, 12, 1, 6, 11]
 
 finalGuess = [0]*16
 for b in range(16):
@@ -51,16 +51,16 @@ for b in range(16):
     for keyGuess in range(0, 256):
         hyp = np.zeros(numTraces, dtype=np.uint8)
         for t in range(0, numTraces):
-            hyp[t] = hammingWeight[outputSBox(ciphers[t][b], keyGuess) ^ ciphers[t][a]]
+            hyp[t] = hammingWeight[outputSBox(
+                ciphers[t][b], keyGuess) ^ ciphers[t][a]]
         cpaOutput[keyGuess] = pearsonr(hyp, traces)[0]
-    
+
 cpaOutput = np.abs(cpaOutput)
 plt.plot(range(256), cpaOutput)
 plt.show()
 
 
 print("Best Key Guess: ", np.argmax(cpaOutput))
-
 
 
 # %%
