@@ -8,13 +8,12 @@ from scipy.stats import pearsonr
 
     #Read them in like a list. It's a 2D list. Should be 16 and then 7000 things inside each thing
 
-class Bytes():
-    def __init__():
-        pass
-    def ones(x):
-        return bin(x).count('1')
-
-
+#class Bytes():
+    #def __init__():
+     
+     #   pass
+    #def ones(x):
+     #   return bin(x).count('1')
 def ones(x):
     return bin(x).count('1')
 
@@ -61,11 +60,11 @@ if __name__ == "__main__":
     # guesses = [0, 256, 1]  # initalize array of 0 ==> 255
     guesses = list(range(256))
     hamWeight = []
-
+    indexmap = np.array([0, 5, 10, 15, 4, 9, 14, 3, 8, 13, 2, 7, 12, 1, 6, 11])
     
     HamDis = np.zeros((7000, 16, 256), dtype=np.uint8)
     for j in range(16):
-        i = j
+        i = indexmap[j] #I think the problem is here? Cause earlier it was like indexmap
         for k in range(256):  # Number of keys in each byte
             for p in range(7000):  # Number of traces
                 HamDis[p][j][k] = ones(
