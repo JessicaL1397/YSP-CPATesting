@@ -2,11 +2,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import pearsonr
-# with open("first_line.txt", 'r') as f:
-#     x = f.readline().split()
-# x = [int(y) for y in x]
-# print(x)
-# plt.plot(x)
 
 
 def ones(x):
@@ -40,62 +35,32 @@ def outputSBox(cipherByte, keyGuess):
     return sbox_inv[cipherByte ^ keyGuess]
 
 
-# traces = np.loadtxt('traces.txt', dtype=np.uint8)
-# plainText = np.loadtxt('plaintexts.txt', dtype=np.uint8)
-# #firstLine = np.loadtxt('first_line.txt', dtype=np.uint8)
-
-
 traces = np.loadtxt("2663.txt", dtype=np.int32)
 ciphers = np.loadtxt("ciphers.txt", dtype=np.uint8)
 numTraces = np.shape(traces)[0]
-# numPoint = np.shape(traces)[1]
+
 graph = []
 
+indexMap = [0, 5, 10, 15, 4, 9, 14, 3, 8, 13, 2, 7, 12, 1, 6, 11]
+
 finalGuess = [0]*16
-# for b in range(0, 1):
-b = 0
-cpaOutput = np.zeros((256,), dtype=np.float32)
-maxCPA = [0]*256
-for keyGuess in range(0, 256):
-    #print("Subkey %2d, hyp = %02x" % (b, keyGuess))
+for b in range(16):
+    a = indexMap[b]
+    cpaOutput = np.zeros((256,), dtype=np.float32)
+    maxCPA = [0]*256
+    for keyGuess in range(0, 256):
+        hyp = np.zeros(numTraces, dtype=np.uint8)
+        for t in range(0, numTraces):
+            hyp[t] = hammingWeight[outputSBox(
+                ciphers[t][b], keyGuess) ^ ciphers[t][a]]
+        cpaOutput[keyGuess] = pearsonr(hyp, traces)[0]
 
-    # Initialize arrays & variables to zero
-    # sumnum = np.zeros(numPoint)
-    # sumden1 = np.zeros(numPoint)
-    # sumden2 = np.zeros(numPoint)
-
-    hyp = np.zeros(numTraces, dtype=np.uint8)
-    for t in range(0, numTraces):
-        hyp[t] = hammingWeight[outputSBox(
-            ciphers[t][b], keyGuess) ^ ciphers[t][b]]
-
-    # # Mean of hypothetical
-    # meanH = np.mean(hyp, dtype=np.float64)
-
-    # # Mean of all points in trace
-    # meanT = np.mean(traces, axis=0, dtype=np.float64)
-
-    # for t in range(0, numTraces):
-    #     hDiff = (hyp[t] - meanH)
-    #     tDiff = traces[t, :] - meanT
-
-    #     sumnum = sumnum + (hDiff*tDiff)
-    #     sumden1 = sumden1 + hDiff*hDiff
-    #     sumden2 = sumden2 + tDiff*tDiff
-
-    cpaOutput[keyGuess] = pearsonr(hyp, traces)[0]
-    # maxCPA[keyGuess] = max(abs(cpaOutput[keyGuess]))
-
-    # graph.append(maxCPA[keyGuess])
-    #print (maxCPA[keyGuess])
 cpaOutput = np.abs(cpaOutput)
 plt.plot(range(256), cpaOutput)
 plt.show()
-# finalGuess[b] = np.argmax(maxCPA)
+
 
 print("Best Key Guess: ", np.argmax(cpaOutput))
-# for f in finalGuess:
-#     print("%02x" % f)
 
 
 # %%
